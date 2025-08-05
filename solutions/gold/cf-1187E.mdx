@@ -2,7 +2,7 @@
 id: cf-1187E
 source: CF
 title: Tree Painting
-author: Yash Singh
+author: Yash Singh, Bishoprunner
 ---
 
 [Official Editorial (C++)](https://codeforces.com/blog/entry/68111)
@@ -167,5 +167,78 @@ int main() {
 ```
 
 </CPPSection>
+<PySection>
+```py
+# Run the solution with Python 3 otherwise it will MLE
+
+import sys
+sys.setrecursionlimit(10**7)
+input = sys.stdin.readline
+
+# Calculate sz and dp1
+def dfs1(u, p):
+    sz[u] = 1
+    for v in g[u]:
+        if v == p:
+            continue
+        dfs1(v, u)
+        sz[u] += sz[v]
+        dp1[u] += dp1[v]
+    dp1[u] += sz[u]
+
+#Calculate cost incorporated for initial value of dp2
+def dfs2(u, p):
+    if p != -1:
+        p1[u] = p1[p] + sz[p] - sz[u]
+        p2[u] = p2[p] + p1[u] + (sz[p] - sz[u])
+    for v in g[u]:
+        if v == p:
+            continue
+        dfs2(v, u)
+
+# Calculate dp2
+def dfs3(u, p):
+    dp2[u] = (p2[u] + 1) if len(g[u]) == 1 else 0
+
+    tot = 0
+    for v in g[u]:
+        if v == p:
+            continue
+        tot += dp1[v]
+
+    for v in g[u]:
+        if v == p:
+            continue
+        dfs3(v, u)
+        dp2[u] = max(dp2[u], dp2[v] + (tot - dp1[v]))
+
+if __name__ == "__main__":
+    n = int(input())
+    g  = [[] for _ in range(n)]
+    dp1 = [0]*n
+    dp2 = [0]*n
+    p1  = [0]*n
+    p2  = [0]*n
+    sz  = [0]*n
+
+    for _ in range(n-1):
+        x, y = map(int, input().split())
+        x -= 1
+        y -= 1
+        g[x].append(y)
+        g[y].append(x)
+
+    dfs1(0, -1)
+    dfs2(0, -1)
+    dfs3(0, -1)
+
+    ans = 0
+    # Find maximum dp1/dp2 among all nodes
+    for i in range(n):
+        ans = max(ans, dp1[i], dp2[i])
+
+    print(ans)
+```
+</PySection>
 
 </LanguageSection>
